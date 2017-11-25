@@ -1,0 +1,16 @@
+
+Instruções de compilação e execução:
+Paralelo MPI
+
+    - Compilar `mpicc main-mpi.c transcription.c io.c -o dna-mpi`
+    - Executar(x processos) `mpirun -np x dna-mpi`
+
+Sequencial
+
+    - Compilar `gcc main-seq.c transcription.c io.c -o dna-seq`
+    - Executar `./dna-seq`
+
+sugiro que os senhores dêem uma olhada neste link: http://www.math.tu-cottbus.de/~kd/parallel/mpi/mpi-course.book_2.html pra entenderem melhor como funciona o MPI que a gente vai ter
+que falar as características de acordo com o que ela deu em aula (a maioria se encontra no relatório na página na seção 4.1. A aplicação basicamente identifica o início
+do cístron (caso haja) pega códons de DNA, transcreve para
+RNA e identifica o aminoácido que cada códon RNA identifica. Códons são grupos de 3 bases nitrogenadas de DNA. tem uma apostlia ali também com esses conceitos básicos na página 19-20.

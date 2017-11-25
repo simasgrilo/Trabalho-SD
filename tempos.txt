@@ -1,0 +1,48 @@
+sequencial:
+dna2.txt (exemplo 1)
+0.001601s 
+0.001495s
+0.001657s
+
+
+
+
+
+
+paralelo
+dna2.txt (122)
+1 processo 0.000384s & 0.000669s & 0.000779s
+2 processos 0.000430s 0.000430s 0.000417s
+3 processos 0.000592s 0.000389s 0.000520s
+4 processos 0.000878s 0.000730s 0.000920s
+5 processos 0.000734s 0.000777s 0.000950s
+10 processos 0.002357s 0.001657s 0.001857s
+
+sequencial (NADA FUNCIONA NO CARALHO DO PARALELO)
+dna6.txt (4441)
+0.051853s
+0.045513s
+0.051077s
+
+paralelo (4441)
+1 processo 0.025306s 0.024628s 0.024155s
+2 processos 0.012745s 0.015242s 0.024917s
+3 processos 0.010869s
+(o que vai ser efetivamente usado)
+
+sequencial (2522)
+dna7alterado.txt (exemplo 2)
+0.021487s
+0.026066s
+0.028954s
+
+paralelo
+1 processo 0.006514s 0.005006s 0.006639s
+2 processos 0.006936s 0.005423s  0.005735s
+3 processos 0.011321s 0.013001s 0.011141s
+4 processos 0.010910s 0.010860s 0.014518s
+6 processos 0.035180s 0.034607s 0.035032s
+15 processos 0.041788s 0.041012s 0.038704s
+41 procesos 0.013867s 0.014117s 0.021192s
+
+
