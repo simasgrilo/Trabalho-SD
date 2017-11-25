@@ -75,7 +75,7 @@ Para a execução da aplicação sequencial, usa-se:
 \includegraphics[scale=0.28]{par2.png}
 \label{par2}
 }
-\caption{Exemplo de uma execução da aplicação paralela, no ambiente MPI com dois processos, um mestre e um escravo}
+\caption{Exemplo de uma execução da aplicação paralela, no ambiente MPI com quatro processos, um mestre e três escravos}
 \label{Figura 1}
 \end{figure}
 
@@ -84,8 +84,8 @@ Para a execução da aplicação sequencial, usa-se:
 \section{A implementação paralela}
 \subsection{Ferramentas}
 
-\paragraph{}O ambiente escolhido para a paralelização da implementação foi o MPI (\emph{Message Passing Interface}, um padrão de comunicação de dados em computação paralela cujo objetivo busca efetuar a troca de mensagens entre processos ou threads, dependendo da implementação) de fomra prática e eficiente. A implementação do padrão MPI utilizada é a OpenMPI \citep{gabriel2004open} escrito em C e a linguagem utilizada é C .\\
-\paragraph{} A nossa implementação consiste no uso do ambiente MPI para paralelizar o processo: Ao iniciar o ambiente MPI, o ambiente de execução paralela é inicalizado. Em seguida, as tarefas são criadas e inicializadas no comunicador padrão (MPI\_COMM\_WORLD) e, então, existem duas rotinas possíveis para serm executadas por cada uma das tarefas, que é a rotina destinada para a tarefa mestre (identificada pelo rank 0) e outra para as demais tarefas (cujo identificadores variam de 1 a N-1, N sendo o número de processos).\\
+\paragraph{}O ambiente escolhido para a paralelização da implementação foi o MPI (\emph{Message Passing Interface}, um padrão de comunicação de dados em computação paralela cujo objetivo busca efetuar a troca de mensagens entre processos ou threads, dependendo da implementação) de forma prática e eficiente. A implementação do padrão MPI utilizada é a OpenMPI \citep{gabriel2004open} escrito em C e a linguagem utilizada é C .\\
+\paragraph{} A nossa implementação consiste no uso do ambiente MPI para paralelizar o processo: Ao iniciar o ambiente MPI, o ambiente de execução paralela é inicalizado. Em seguida, as tarefas são criadas e inicializadas no comunicador padrão (MPI\_COMM\_WORLD) e, então, existem duas rotinas possíveis para serem executadas por cada uma das tarefas, que é a rotina destinada para a tarefa mestre (identificada pelo rank 0) e outra para as demais tarefas (cujo identificadores variam de 1 a N-1, N sendo o número de processos).\\
 
 No padrão MPI na implementação OpenMPI, as principais características são:
 \begin{itemize}
@@ -105,19 +105,19 @@ Existem quatro modelos de comunicação fornecidos pelo MPI: padrão, síncrona,
 
 \item{Nomeação}: A nível lógico, o padrão MPI usa o conceito de \emph{ranks} para identificar seus processos. Na implementação OpenMPI, os processos possuem \emph{ranks} que são enumerados de zero à N-1 (N sendo o número total de processos da aplicação MPI)  e os \emph{ranks} são os identificadores de um processo dentro de um dado comunicador. Por padrão, costuma-se usar (em abordagens do tipo coordenador-trabalhador) o rank 0 como sendo o coordenador e os demais ranks são os processos operários.\\
 
-\item{Sincronização} O MPI possui uma rotina específica chamda MPI\_Barrier(MPI\_Comm communicator) que sincroniza todos os processos que fazem parte do comunicador \emph{communicator}, criando uma espécie de barreira onde a execução dos processos só continua quando todos eles atingirem o mesmo ponto. Tal sincronização é transparente ao programador que usa o padrão MPI.
+\item{Sincronização}: O MPI possui uma rotina específica chamda MPI\_Barrier (MPI\_Comm communicator) que sincroniza todos os processos que fazem parte do comunicador \emph{communicator}, criando uma espécie de barreira onde a execução dos processos só continua quando todos eles atingirem o mesmo ponto. Tal sincronização é transparente ao programador que usa o padrão MPI.
 
-\item{Tolerância a falhas} MPI não tolera falhas: quedas de processos e/ou de mensagens trocadas entre processos ocasionam a interrupção do funcionamento da aplicação MPI como um todo.
+\item{Tolerância a falhas}: MPI não tolera falhas. quedas de processos e/ou de mensagens trocadas entre processos ocasionam a interrupção do funcionamento da aplicação MPI como um todo.
 
 
 \end{itemize}
 \subsection{Descrição da implementação}
-\paragraph{}A tarefa mestre então inicia sua execução: primeiro ela efetua a leitura do arquivo (utilizando a função \emph{ler}, disponível em io.c), obtendo a cadeia de DNA inserida como entrada e, em seguida, dividindo a mesma em pedaços menores de sub-cadeias de DNA (por exemplo, para uma cadeia de 60 nucleotídeos, como cada códon possui tamanho 3, nessa etapa a tarefa mestre dividiria a cadeia em 20 sub-cadeias de tamanho 3 cada, utilizando a rotina split, encontrada em transcription.c) e em seguida, envia as subcadeias para as demais tarefas (mantendo a primeira porção para si) por meio da chamada da função MPI\_Send (primeiramente enviando a quantidade de códons que a tarefa irá receber, em seguida enviando os códons), que faz o envio bloqueante síncrono de mensagens (isso significa que a tarefa que está enviando retorna a execução assim que a mensagem foi enviada, o que não implica que a mesma foi recebida pela tarefa receptora).\\
-\paragraph{}Após o envio dos dados necessários (quantidade de códons e os códons em si), a tarefa mestre começa a efetuar o processamento na parte dos códons que com ela ficou: primeiro, ela divide a sub-cadeia de DNA que restou em outras sub-cadeias de tamanho 3 (o tamanho de um códon) e, para cada uma dessas sub-cadeias, faz a transcrição de DNA para RNA, utilizando a função transcription (encontrada em transcription.c) e em seguida identificando o aminoácido referente ao códon transcrito, fazendo uso da rotina transcription (que pode ser encontrada em trascription.c).\\
-\paragraph{}Nesse momento, as demais tarefas escravo também estão fazendo o mesmo: após o recebimento das mensagens que foram enviadas pela tarefa mestre (recebimento feito por meio da rotina MPI\_Recv), cada uma das tarefas escravo divide a cadeia de DNA recebida em sub-cadeis de tamanho 3 (da mesma forma que a mestre), e, para cada sub-cadeia de DNA gerada a partir da cadeia que a tarefa recebeu, ela faz a transcrição de DNA e a tradução do códon para o aminoácido que ele identifica (da mesma forma que a tarefa mestre). Ao término do processo, elas enviam o resultado do processamento (que seria todos os códons transcritos e cada um dos seus respectivos aminoácidos) para a tarefa mestre\\
+\paragraph{}A tarefa mestre inicia sua execução: primeiro ela efetua a leitura do arquivo (utilizando a função \emph{ler}, disponível em io.c), obtendo a cadeia de DNA inserida como entrada e, em seguida, dividindo a mesma em pedaços menores de sub-cadeias de DNA (por exemplo, para uma cadeia de 60 nucleotídeos, como cada códon possui tamanho 3, nessa etapa a tarefa mestre dividiria a cadeia em 20 sub-cadeias de tamanho 3 cada, utilizando a rotina split, encontrada em transcription.c) e em seguida, envia as subcadeias para as demais tarefas (mantendo a primeira porção para si) por meio da chamada da função MPI\_Send (primeiramente enviando a quantidade de códons que a tarefa irá receber, em seguida enviando os códons), que faz o envio bloqueante síncrono de mensagens (isso significa que a tarefa que está enviando retorna a execução assim que a mensagem foi enviada, o que não implica que a mesma foi recebida pela tarefa receptora). Caso o tamanho do códon não seja divisível pelo número de processos, o resto da divisão é a quantidade de códons extras que a tarefa mestre vai ter que processar além do que as demais tarefas também processam.\\
+\paragraph{}Após o envio dos dados necessários (quantidade de códons e os códons em si), a tarefa mestre começa a efetuar o processamento na parte dos códons que com ela ficou: primeiro, ela divide a sub-cadeia de DNA que restou em outras sub-cadeias de tamanho 3 (o tamanho de um códon) e, para cada uma dessas sub-cadeias, faz a transcrição de DNA para RNA, utilizando a função transcription (encontrada em transcription.c) e em seguida identificando o aminoácido referente ao códon transcrito, fazendo uso da rotina transcription (que pode ser encontrada em transcription.c).\\
+\paragraph{}Nesse momento, as demais tarefas escravo também estão fazendo o mesmo: após o recebimento das mensagens que foram enviadas pela tarefa mestre (recebimento feito por meio da rotina de recebimento bloqueante MPI\_Recv), cada uma das tarefas escravo divide a cadeia de DNA recebida em sub-cadeis de tamanho 3 (da mesma forma que a mestre), e, para cada sub-cadeia de DNA gerada a partir da cadeia que a tarefa recebeu, ela faz a transcrição de DNA e a tradução do códon para o aminoácido que ele identifica (da mesma forma que a tarefa mestre). Ao término do processo, elas enviam o resultado do processamento (que seria todos os códons transcritos e cada um dos seus respectivos aminoácidos) para a tarefa mestre\\
 \paragraph{} A mestre então, para cada tarefa escravo, ela recebe os dados da tarefa escravo (por meio da rotina MPI\_Recv) e, para cada conjunto de dados recebidos (de cada tarefa), ela vai armazenando as cadeias de RNA transcritos e os seus respectivos aminoácidos. Ao fim da recepção (todas as tarefas escravo concluíram o envio, a tarefa mestre então imprime na tela o resultado do processamento: para cada códon, imprime na tela o códon de DNA original da entrada, a cadeia de RNA transcrita referente à tal códon e o aminoácido que tal cadeia de RNA identifica. Em seguida, escreve o mesmo que ela imprimiu em um arquivo de saída. Ao fim da execução do ambiente MPI, é pego o tempo de finalização (a fim de ver quanto tempo o processamento levou) e o ambiente é finalizado pelo processo main (o mesmo onde o ambiente é inicializado) por meio da rotina MPI\_Finalize.\\
 
-Para executar a aplicação paralela (em uma única máquina), usa-se:
+Para executar a aplicação paralela (em uma única máquina), usa-se:\\
 \begin{center}\begin{itemize}\item{Compilar:} `mpicc main-mpi.c transcription.c io.c -o dna-mpi`\\
                      \item{Executar (x processos):} `mpirun -np x dna-mpi`\end{itemize}\end{center}
 
@@ -133,7 +133,7 @@ A ideia inicial seria efetuar a medição de desempenho em diversas máquinas. P
 1 processo   &	0.001601s   &   0.001495s   & 0,000170s   &  0.001657s\\ \hline
 
 \end{tabular}
-\caption{Tabela da execução com entrada de um cístron com 60 nucleotídeos para a aplicação sequencial}
+\caption{Tabela da execução com entrada de um cístron com 122 bases nitrogenadas para a aplicação sequencial}
 \end{table}
 
 \begin{table}[!htb]
